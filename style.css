@@ -1,0 +1,335 @@
+* { box-sizing: border-box; }
+
+:root {
+  color-scheme: dark;
+  --text: #e8e6e1;
+  --muted: rgba(232, 230, 225, 0.5);
+  --faint: rgba(232, 230, 225, 0.08);
+  --line: rgba(255, 255, 255, 0.09);
+  --panel: rgba(14, 16, 20, 0.7);
+  --accent: #f0c28c;
+  --mono: ui-monospace, "Cascadia Mono", Consolas, monospace;
+}
+
+body {
+  height: 100vh;
+  margin: 0;
+  overflow: hidden;
+  background:
+    linear-gradient(rgba(8, 10, 14, 0.35), rgba(8, 10, 14, 0.55)),
+    url("assets/remove_object_01 (1).png") center / cover,
+    #080a0e;
+  color: var(--text);
+  font: 14px/1.4 ui-sans-serif, system-ui, "Segoe UI", sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+button, input { font: inherit; color: inherit; }
+
+button {
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+button:focus-visible, input:focus-visible { outline: 1px solid var(--accent); outline-offset: 2px; }
+
+svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+input[type="range"] { width: 100%; margin: 0; accent-color: var(--accent); cursor: pointer; }
+
+/* desktop */
+
+.desktop {
+  position: fixed;
+  top: 20px;
+  left: 16px;
+  display: grid;
+  gap: 6px;
+}
+
+.desktop button {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  width: 76px;
+  padding: 10px 4px 8px;
+  border-radius: 3px;
+  font: 11px var(--mono);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+.desktop svg { width: 26px; height: 26px; stroke-width: 1.2; filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.6)); }
+.desktop button:hover, .desktop button:focus-visible { background: rgba(255, 255, 255, 0.08); }
+
+/* windows */
+
+.window {
+  position: fixed;
+  top: calc(50% - 22px);
+  left: 50%;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100vh - 64px);
+  translate: -50% -50%;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  background: var(--panel);
+  backdrop-filter: blur(20px) saturate(0.8);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+  animation: open 220ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.window[hidden] { display: none; }
+.window.closing { pointer-events: none; animation: close 160ms ease-in forwards; }
+.window.minimizing { pointer-events: none; animation: minimize 260ms cubic-bezier(0.4, 0, 1, 1) forwards; }
+
+@keyframes open { from { opacity: 0; transform: translateY(8px) scale(0.98); } }
+@keyframes close { to { opacity: 0; transform: scale(0.98); } }
+@keyframes minimize { to { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(0.1); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .window, .window.closing, .window.minimizing { animation-duration: 1ms; }
+}
+
+.titlebar {
+  display: flex;
+  flex: none;
+  align-items: center;
+  height: 34px;
+  padding-left: 12px;
+  border-bottom: 1px solid var(--line);
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+
+.titlebar:active { cursor: grabbing; }
+
+.titlebar span {
+  flex: 1;
+  color: var(--muted);
+  font: 11px var(--mono);
+  letter-spacing: 0.04em;
+}
+
+.titlebar button {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 33px;
+  color: var(--muted);
+}
+
+.titlebar button:hover { background: var(--faint); color: var(--text); }
+.titlebar [data-action="close"]:hover { background: rgba(220, 80, 70, 0.6); }
+
+.frame {
+  width: min(960px, calc(100vw - 24px));
+  height: min(680px, calc(100vh - 64px));
+}
+
+.frame iframe { flex: 1; width: 100%; border: 0; background: #fff; }
+.frame:fullscreen { max-height: none; border: 0; border-radius: 0; translate: none; }
+
+/* player */
+
+#player { width: min(380px, calc(100vw - 24px)); }
+
+.player-body {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-height: 0;
+  padding: 20px 18px 16px;
+}
+
+.now { display: grid; gap: 2px; min-width: 0; }
+.now strong { overflow: hidden; font-size: 17px; font-weight: 500; text-overflow: ellipsis; white-space: nowrap; }
+.now span { color: var(--muted); font: 11px var(--mono); }
+
+.times {
+  display: flex;
+  justify-content: space-between;
+  margin-top: -10px;
+  color: var(--muted);
+  font: 11px var(--mono);
+}
+
+.controls { display: flex; align-items: center; gap: 4px; }
+
+.controls button {
+  display: grid;
+  place-items: center;
+  height: 34px;
+  min-width: 34px;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  font: 12px var(--mono);
+}
+
+.controls button:hover { background: var(--faint); }
+.controls .play { flex: 1; background: var(--text); color: #111; border-color: transparent; }
+.controls .play:hover { background: #fff; }
+.controls .loop { width: 88px; color: var(--muted); }
+.controls .loop.on { color: var(--accent); }
+
+.volume {
+  display: grid;
+  grid-template-columns: 28px 1fr 28px;
+  align-items: center;
+  gap: 10px;
+  color: var(--muted);
+  font: 11px var(--mono);
+}
+
+.volume span:last-child { text-align: right; }
+
+.queue-head {
+  display: flex;
+  justify-content: space-between;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font: 11px var(--mono);
+}
+
+.songs {
+  min-height: 0;
+  overflow-y: auto;
+  margin: -8px -6px 0;
+  padding: 0;
+  list-style: none;
+  scrollbar-width: thin;
+  scrollbar-color: var(--line) transparent;
+}
+
+#queue { max-height: 200px; }
+
+.songs li { display: flex; border-radius: 2px; }
+.songs li:hover { background: var(--faint); }
+.songs li.current { color: var(--accent); }
+
+.songs .pick {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  padding: 6px;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.numbered { counter-reset: song; }
+.numbered .pick::before {
+  display: inline-block;
+  width: 28px;
+  color: var(--muted);
+  font: 11px var(--mono);
+  counter-increment: song;
+  content: counter(song, decimal-leading-zero);
+}
+
+.songs .remove { width: 28px; color: var(--muted); opacity: 0; }
+.songs li:hover .remove, .songs .remove:focus-visible { opacity: 1; }
+.songs .remove:hover { color: var(--text); }
+.songs .empty { padding: 10px 6px; color: var(--muted); }
+
+.import {
+  padding: 9px;
+  border: 1px dashed var(--line);
+  border-radius: 3px;
+  color: var(--muted);
+  font: 11px var(--mono);
+  text-align: center;
+  cursor: pointer;
+}
+
+.import:hover, .import:focus-within { border-color: var(--muted); color: var(--text); }
+.import input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+
+/* library */
+
+#library {
+  width: min(320px, calc(100vw - 24px));
+  height: min(440px, calc(100vh - 64px));
+  translate: calc(-50% + 360px) -50%;
+}
+
+#search {
+  margin: 10px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  background: rgba(0, 0, 0, 0.25);
+}
+
+#search::placeholder { color: var(--muted); }
+#results { flex: 1; margin: 0; padding: 0 4px 6px; }
+
+/* taskbar */
+
+.taskbar {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  height: 44px;
+  padding: 0 8px;
+  border-top: 1px solid var(--line);
+  background: var(--panel);
+  backdrop-filter: blur(20px) saturate(0.8);
+}
+
+.taskbar button {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 34px;
+  padding: 0 12px;
+  border-radius: 3px;
+  color: var(--muted);
+  font: 12px var(--mono);
+}
+
+.taskbar button:hover { background: var(--faint); color: var(--text); }
+.taskbar button.running { color: var(--text); }
+
+.taskbar button.running::after {
+  position: absolute;
+  bottom: 2px;
+  left: 50%;
+  width: 4px;
+  height: 2px;
+  translate: -50%;
+  background: var(--muted);
+  content: "";
+}
+
+.taskbar button[aria-pressed="true"]::after { width: 14px; background: var(--accent); }
+
+#clock { margin-left: auto; padding-right: 8px; color: var(--muted); font: 12px var(--mono); }
+
+@media (max-width: 1080px) {
+  #library { translate: -50% -50%; }
+}
+
+@media (max-width: 560px) {
+  .desktop { display: none; }
+  .taskbar button { flex: 1; justify-content: center; padding: 0; }
+  .taskbar button span, #clock { display: none; }
+}
